@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ミーム・チャンピオンズ</title>
+<style>
+:root{--bg:#10131b;--panel:#1c2230;--line:#39445a;--text:#f4f6fb;--muted:#aeb8ca;--gold:#f4c95d;--blue:#62b5ff;--red:#ff7272;--green:#7fe0a1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#28344c 0,#10131b 55%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:980px;margin:auto;padding:24px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(27px,5vw,42px);letter-spacing:.04em}.tag{color:var(--gold);font-weight:800;letter-spacing:.12em;font-size:12px}
+.sub{color:var(--muted);margin:8px 0 20px}.arena{background:linear-gradient(145deg,#242e42,#171d29);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 18px 55px #0007}
+.field{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:#111722;border:1px solid #3b465a;border-radius:16px;padding:15px;min-width:0}
+.card h2{font-size:15px;color:var(--muted);margin:0 0 12px}.creature{display:flex;align-items:center;gap:13px}.avatar{width:82px;height:82px;flex:0 0 82px;border-radius:18px;display:grid;place-items:center;font-size:42px;background:linear-gradient(135deg,#334a67,#202b3d);border:1px solid #63748e}
+.name{font-weight:900;font-size:20px}.type{font-size:12px;color:var(--gold);margin-top:3px}.hptext{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin:14px 0 6px}
+.bar{height:11px;background:#333d4d;border-radius:99px;overflow:hidden}.fill{height:100%;width:100%;background:var(--green);transition:width .25s}.enemy .fill{background:var(--red)}
+.log{margin-top:15px;background:#0c111a;border:1px solid #30394a;border-radius:14px;padding:14px;min-height:78px;line-height:1.6;color:#dce5f5}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+button{border:1px solid #53627a;background:linear-gradient(180deg,#34445e,#26344a);color:white;border-radius:12px;padding:13px 12px;font-weight:800;font-size:15px;cursor:pointer;transition:transform .12s,border-color .12s}
+button:hover:not(:disabled){transform:translateY(-2px);border-color:var(--gold)}button:disabled{opacity:.4;cursor:not-allowed}
+.utility{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.utility button{font-size:13px;padding:10px 13px;background:#202a3a}
+.note{color:#8491a6;font-size:12px;line-height:1.6;margin:16px 2px 0}
+@media(max-width:620px){.field{grid-template-columns:1fr}.avatar{width:70px;height:70px;flex-basis:70px}.controls{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><div><div class="tag">UNOFFICIAL MEME BATTLE</div><h1>ミーム・チャンピオンズ</h1></div><div class="tag">WEB DEMO v1.0</div></div>
+  <p class="sub">オリジナルのミーム風キャラで遊ぶ、ターン制バトルゲーム。</p>
+  <section class="arena">
+    <div class="field">
+      <article class="card enemy">
+        <h2>CHALLENGER / 相手</h2>
+        <div class="creature"><div class="avatar" id="enemyIcon">🗿</div><div><div class="name" id="enemyName">無言の石像</div><div class="type" id="enemyType">タイプ：圧</div></div></div>
+        <div class="hptext"><span>HP</span><span id="enemyHpText">100 / 100</span></div><div class="bar"><div class="fill" id="enemyBar"></div></div>
+      </article>
+      <article class="card">
+        <h2>YOUR SIDE / こちら</h2>
+        <div class="creature"><div class="avatar" id="playerIcon">🧢</div><div><div class="name" id="playerName">新人トレーナー</div><div class="type" id="playerType">タイプ：勢い</div></div></div>
+        <div class="hptext"><span>HP</span><span id="playerHpText">100 / 100</span></div><div class="bar"><div class="fill" id="playerBar"></div></div>
+      </article>
+    </div>
+    <div class="log" id="log" aria-live="polite">対戦相手が現れた！ 技を選んでバトル開始！</div>
+    <div class="controls">
+      <button data-move="0">語録パンチ　威力 18</button>
+      <button data-move="1">圧のある一言　威力 24</button>
+      <button data-move="2">謎の તેજ気　威力 14・回復</button>
+      <button data-move="3">810テンション　威力 30・低命中</button>
+    </div>
+    <div class="utility"><button id="newBattle">相手を変えて再戦</button><button id="heal">休憩する（HP回復）</button></div>
+  </section>
+  <p class="note">※ファンメイドの非公式デモです。任天堂・株式会社ポケモンとは無関係です。公式の画像・音声・キャラクター素材は使用していません。成人向け表現は含まないミーム風パロディです。</p>
+</main>
+<script>
+const enemies=[
+ {name:"無言の石像",icon:"🗿",type:"圧",hp:100,power:13},
+ {name:"高速レス職人",icon:"⌨️",type:"速度",hp:92,power:16},
+ {name:"深夜テンション",icon:"🌙",type:"夜更かし",hp:110,power:12},
+ {name:"謎の切り抜き師",icon:"✂️",type:"編集",hp:88,power:18}
+];
+const moves=[
+ {name:"語録パンチ",power:18,accuracy:1,heal:0},
+ {name:"圧のある一言",power:24,accuracy:.88,heal:0},
+ {name:"謎の元気",power:14,accuracy:1,heal:12},
+ {name:"810テンション",power:30,accuracy:.62,heal:0}
+];
+let enemy,playerHp=100,enemyHp=100,locked=false;
+const $=id=>document.getElementById(id);
+function say(t){$("log").textContent=t}
+function update(){
+ $("playerHpText").textContent=`${playerHp} / 100`;$("enemyHpText").textContent=`${enemyHp} / ${enemy.hp}`;
+ $("playerBar").style.width=playerHp+"%";$("enemyBar").style.width=(enemyHp/enemy.hp*100)+"%";
+ document.querySelectorAll("[data-move]").forEach(b=>b.disabled=locked||playerHp<=0||enemyHp<=0);
+}
+function start(){
+ enemy=enemies[Math.floor(Math.random()*enemies.length)];playerHp=100;enemyHp=enemy.hp;locked=false;
+ $("enemyName").textContent=enemy.name;$("enemyIcon").textContent=enemy.icon;$("enemyType").textContent="タイプ："+enemy.type;
+ say(`${enemy.name}が勝負をしかけてきた！ 技を選べ！`);update();
+}
+function end(won){locked=true;update();say(won?`${enemy.name}に勝利！ チャンピオンへの道が開けた！`:"こちらのHPが0になった……「相手を変えて再戦」で再挑戦しよう！")}
+function attack(i){
+ if(locked||playerHp<=0||enemyHp<=0)return;
+ const m=moves[i];
+ if(Math.random()>m.accuracy){say(`${m.name}！ しかし攻撃は外れた！`)}
+ else {enemyHp=Math.max(0,enemyHp-m.power);if(m.heal)playerHp=Math.min(100,playerHp+m.heal);say(`${m.name}！ ${enemy.name}に${m.power}ダメージ！${m.heal?` HPが${m.heal}回復！`:""}`)}
+ if(enemyHp<=0){update();end(true);return}
+ setTimeout(()=>{
+   if(locked)return;
+   const dmg=Math.max(5,Math.floor(enemy.power*(.78+Math.random()*.5)));
+   playerHp=Math.max(0,playerHp-dmg);
+   say(`${enemy.name}の反撃！ ${dmg}ダメージを受けた！`);
+   update();if(playerHp<=0)end(false);
+ },350);
+ update();
+}
+document.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",()=>attack(Number(b.dataset.move))));
+$("newBattle").addEventListener("click",start);
+$("heal").addEventListener("click",()=>{if(locked)return;playerHp=Math.min(100,playerHp+25);say("ひと休み！ HPが25回復した。相手のターン！");update();setTimeout(()=>{if(locked)return;let d=enemy.power;playerHp=Math.max(0,playerHp-d);say(`${enemy.name}の不意打ち！ ${d}ダメージ！`);update();if(playerHp<=0)end(false)},350)});
+start();
+</script>
+</body>
+</html>
